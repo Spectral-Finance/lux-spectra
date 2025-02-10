@@ -1,4 +1,8 @@
 import Config
+import Dotenvy
+
+# Load environment variables from .env file
+source!([".env", ".env.#{config_env()}"])
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the

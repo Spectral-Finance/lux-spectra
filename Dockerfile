@@ -3,6 +3,11 @@ FROM elixir:1.18.1
 # Build Args
 ARG PHOENIX_VERSION=1.7.18
 ARG NODE_VERSION=20.10.0
+ARG MIX_ENV=dev
+
+# Environment variables that should be available at runtime
+ENV MIX_ENV=${MIX_ENV} \
+    LANG=C.UTF-8
 
 # Dependencies
 RUN apt update \
@@ -14,39 +19,24 @@ RUN mkdir -p ~/.ssh && \
     chmod 700 ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-# First create the directories (everything under /app)
-RUN mkdir -p /opt/build \
-    && mkdir -p /opt/build/_build \
-    && mkdir -p /opt/build/deps \
-    && mkdir -p /opt/build/assets
-
-# Switch to the work dir
-WORKDIR /opt/build
-
-# Copy in the base mixfiles
-COPY mix.exs mix.lock /opt/build/
+# Create app directory
+WORKDIR /app
 
 # Setup hex/rebar
-RUN mix do local.rebar --force, local.hex --force
+RUN mix local.hex --force && \
+    mix local.rebar --force
 
-# Copy in the directories
-COPY config /opt/build/config
-COPY assets /opt/build/assets
-
-WORKDIR /opt/build
-
-# Copy the app source code and files needed to build the release.
-COPY lib/ ./lib
-COPY priv/ ./priv/
-COPY mix.exs ./mix.exs
+# Copy dependency files
+COPY mix.exs mix.lock ./
 
 # Get dependencies
-RUN --mount=type=ssh mix do deps.clean --all, deps.get, deps.compile
+RUN --mount=type=ssh mix do deps.clean --all, deps.get
 
-RUN mix compile
+# Copy the rest of the application code
+COPY . .
 
 # App Port
 EXPOSE 4000
 
-# Default Command
+# Start Phoenix with auto-reload enabled
 CMD ["mix", "phx.server"]

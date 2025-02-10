@@ -28,3 +28,8 @@ erl_crash.dump
 # Docker
 .docker-sync/
 docker-compose.override.yml
+
+# Environment variables
+.env
+.env.*
+!.env.example
