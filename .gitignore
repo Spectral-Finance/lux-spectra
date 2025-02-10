@@ -21,3 +21,10 @@ erl_crash.dump
 
 # Temporary files, for example, from tests.
 /tmp/
+
+.DS_Store
+/.elixir_ls
+
+# Docker
+.docker-sync/
+docker-compose.override.yml
