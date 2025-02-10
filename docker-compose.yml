@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  local-agent:
+    build: 
+      context: .
+      ssh: 
+        - default
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - deps:/app/deps
+      - build:/app/_build
+    environment:
+      - MIX_ENV=dev
+    command: mix phx.server
+
+volumes:
+  deps:
+  build: 
