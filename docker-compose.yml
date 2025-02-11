@@ -14,7 +14,12 @@ services:
       - build:/app/_build
     environment:
       - MIX_ENV=dev
-    command: mix phx.server
+      - PHOENIX_LIVE_RELOAD=true
+    env_file:
+      - .env
+    command: bash -c "mix do deps.get, deps.compile && mix phx.server"
+    # Enable inotify events
+    privileged: true
 
 volumes:
   deps:

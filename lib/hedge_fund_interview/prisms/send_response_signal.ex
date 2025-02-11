@@ -1,19 +1,21 @@
 defmodule HedgeFundInterview.Prisms.SendResponseSignal do
   use Lux.Prism
 
+  @interview_message_schema_id "c5f8b7e1-1b2a-5e2a-9f2a-1b2a5e2a9f2a"
+
 
   def handler(answer, _ctx) do
     response_signal = %{
       id: Lux.UUID.generate(),
       payload: %{
         message: answer,
-        job_opening_id: "3141592653"
+        job_opening_id: System.get_env("JOB_OPENING_ID")
       },
-      sender: "rick_deckard",
+      sender: System.get_env("ANS_HANDLE"),
       receiver: "spectra_ceo",
-      timestamp: "2024-03-19T10:30:00Z",
+      timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
-      signal_schema_id: "c5f8b7e1-1b2a-5e2a-9f2a-1b2a5e2a9f2a"
+      signal_schema_id: @interview_message_schema_id
     }
 
     case send_signal(response_signal) do
@@ -26,7 +28,9 @@ defmodule HedgeFundInterview.Prisms.SendResponseSignal do
   end
 
   defp send_signal(signal) do
-    case Req.post("http://localhost:4040/signals/register", json: signal) do
+    endpoint = System.get_env("SPECTRAL_API_AGENTS_ENDPOINT")
+
+    case Req.post("#{endpoint}/signals/register", json: signal) do
       {:ok, response} -> {:ok, response}
       {:error, error} -> {:error, error}
     end
