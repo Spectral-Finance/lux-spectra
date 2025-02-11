@@ -1,9 +1,11 @@
 defmodule HedgeFundInterviewWeb.SignalController do
   use HedgeFundInterviewWeb, :controller
 
-  alias HedgeFundInterview.Schemas.InterviewMessageSchema
   alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
   alias HedgeFundInterview.Beams.BeginInterview
+  alias HedgeFundInterview.Schemas.InterviewMessageSchema
+  alias HedgeFundInterview.Schemas.RejectMessageSchema
+  alias HedgeFundInterview.Schemas.ShortlistMessageSchema
   alias Lux.Beam.Runner
 
   require Logger
@@ -16,14 +18,29 @@ defmodule HedgeFundInterviewWeb.SignalController do
     I'm excited to dive into the details of my projects and discuss how my skill set aligns with your firm's trading and DeFi initiatives.
   """
 
+  @interview_message_schema_id InterviewMessageSchema.signal_schema_id()
+  @reject_message_schema_id RejectMessageSchema.signal_schema_id()
+  @shortlist_message_schema_id ShortlistMessageSchema.signal_schema_id()
+
   def process_signal(conn, params) do
-    with atom_params <- convert_to_atoms(params),
+    with :ok <- validate_signal_schema_id(params["signal_schema_id"]),
+         atom_params <- convert_to_atoms(params),
          {:ok, signal} <- InterviewMessageSchema.validate(atom_params),
          {:ok, _beam_result, _beam_acc} <- Runner.run(InterviewAnswerWorkflow.beam(), signal) do
       conn
       |> put_status(:ok)
-      |> json(%{status: "success"})
+      |> json(%{status: "Interview answer sent"})
     else
+      {:ok, :reject} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{status: "Received reject message"})
+
+      {:ok, :shortlist} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{status: "Congratulations! You received a shortlist message"})
+
       {:error, reason} ->
         conn
         |> put_status(:bad_request)
@@ -53,5 +70,27 @@ defmodule HedgeFundInterviewWeb.SignalController do
 
   defp convert_to_atoms(params) do
     for {key, val} <- params, into: %{}, do: {String.to_atom(key), val}
+  end
+
+  defp validate_signal_schema_id(schema_id) do
+    IO.inspect(schema_id, label: "schema_id")
+    IO.inspect(@interview_message_schema_id, label: "interview_message_schema_id")
+
+    case schema_id do
+      @interview_message_schema_id ->
+        :ok
+
+      @reject_message_schema_id ->
+        Logger.info("Reject message received")
+        {:ok, :reject}
+
+      @shortlist_message_schema_id ->
+        Logger.info("Shortlist message received")
+        {:ok, :shortlist}
+
+      _ ->
+        Logger.error("Unexpected signal schema id received: #{schema_id}")
+        {:error, "Invalid signal schema id"}
+    end
   end
 end
