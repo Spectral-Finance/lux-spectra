@@ -12,9 +12,11 @@ services:
       - .:/app
       - deps:/app/deps
       - build:/app/_build
+      - ${SSH_AUTH_SOCK}:/ssh-agent
     environment:
       - MIX_ENV=dev
       - PHOENIX_LIVE_RELOAD=true
+      - SSH_AUTH_SOCK=/ssh-agent
     env_file:
       - .env
     command: bash -c "mix do deps.get, deps.compile && mix phx.server"
