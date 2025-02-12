@@ -73,9 +73,6 @@ defmodule HedgeFundInterviewWeb.SignalController do
   end
 
   defp validate_signal_schema_id(schema_id) do
-    IO.inspect(schema_id, label: "schema_id")
-    IO.inspect(@interview_message_schema_id, label: "interview_message_schema_id")
-
     case schema_id do
       @interview_message_schema_id ->
         :ok
