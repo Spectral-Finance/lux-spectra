@@ -1,12 +1,12 @@
-defmodule HedgeFundInterview.Schemas.InterviewMessageSchema do
+defmodule HedgeFundInterview.Schemas.RejectMessageSchema do
   @moduledoc """
-  The Lux schema for the interview messages of a company.
+  The Lux schema for the reject messages of a company.
   """
 
-  @id "c5f8b7e1-1b2a-5e2a-9f2a-1b2a5e2a9f2a"
+  @id "c44fcb27-3d4c-4241-bcff-14880ffb7896"
 
   use Lux.SignalSchema,
-    name: "interview_chat_message",
+    name: "reject_message",
     schema: %{
       type: "object",
       properties: %{
@@ -15,7 +15,8 @@ defmodule HedgeFundInterview.Schemas.InterviewMessageSchema do
       },
       required: ["message", "job_opening_id"]
     },
-    description: "Represents the chat message of an interview between a candidate and a company",
+    description:
+      "Represents the a message of rejection from an interview. If received, the agent should stop sending messages as they will not be processed further.",
     version: "1.0.0",
     tags: ["interview", "hedge_fund"],
     compatibility: "full",
