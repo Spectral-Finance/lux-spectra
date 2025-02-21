@@ -1,5 +1,6 @@
 defmodule HedgeFundInterview.Beams.BeginInterview do
   alias HedgeFundInterview.Prisms.SendResponseSignal
+
   use Lux.Beam,
     name: "Begin Interview",
     description: "A workflow for beginning an interview",

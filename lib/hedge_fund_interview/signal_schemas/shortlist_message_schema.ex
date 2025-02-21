@@ -6,6 +6,7 @@ defmodule HedgeFundInterview.Schemas.ShortlistMessageSchema do
   @id "bd0f42a6-a2bf-41a6-bf81-47427ad05065"
 
   use Lux.SignalSchema,
+    id: @id,
     name: "shortlist_message",
     schema: %{
       type: "object",

@@ -7,6 +7,7 @@ defmodule HedgeFundInterview.Schemas.InterviewMessageSchema do
 
   use Lux.SignalSchema,
     name: "interview_chat_message",
+    id: @id,
     schema: %{
       type: "object",
       properties: %{
@@ -21,6 +22,4 @@ defmodule HedgeFundInterview.Schemas.InterviewMessageSchema do
     compatibility: "full",
     status: "active",
     format: "json"
-
-  def signal_schema_id, do: @id
 end

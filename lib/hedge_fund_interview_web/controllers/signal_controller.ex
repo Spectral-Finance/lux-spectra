@@ -18,9 +18,10 @@ defmodule HedgeFundInterviewWeb.SignalController do
     I'm excited to dive into the details of my projects and discuss how my skill set aligns with your firm's trading and DeFi initiatives.
   """
 
-  @interview_message_schema_id InterviewMessageSchema.signal_schema_id()
-  @reject_message_schema_id RejectMessageSchema.signal_schema_id()
-  @shortlist_message_schema_id ShortlistMessageSchema.signal_schema_id()
+  @interview_message_schema_id InterviewMessageSchema.id()
+  @reject_message_schema_id RejectMessageSchema.id()
+  @shortlist_message_schema_id ShortlistMessageSchema.id()
+  @not_enough_messages_id NotEnoughCreditsSchema.id()
 
   def process_signal(conn, params) do
     with :ok <- validate_signal_schema_id(params["signal_schema_id"]),
@@ -48,6 +49,7 @@ defmodule HedgeFundInterviewWeb.SignalController do
 
       error ->
         Logger.error("Error processing signal: #{inspect(error)}")
+
         conn
         |> put_status(:internal_server_error)
         |> json(%{error: "An unexpected error occurred"})
@@ -84,6 +86,10 @@ defmodule HedgeFundInterviewWeb.SignalController do
       @shortlist_message_schema_id ->
         Logger.info("Shortlist message received")
         {:ok, :shortlist}
+
+      @not_enough_messages_id ->
+        Logger.info("Not enough messages received")
+        {:error, "Not enough messages, you need to buy more."}
 
       _ ->
         Logger.error("Unexpected signal schema id received: #{schema_id}")

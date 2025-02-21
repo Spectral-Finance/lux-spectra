@@ -2,7 +2,9 @@ defmodule HedgeFundInterviewWeb.ErrorJSONTest do
   use HedgeFundInterviewWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert HedgeFundInterviewWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert HedgeFundInterviewWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do

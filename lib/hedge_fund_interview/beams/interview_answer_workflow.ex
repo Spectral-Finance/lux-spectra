@@ -2,6 +2,7 @@ defmodule HedgeFundInterview.Beams.InterviewAnswerWorkflow do
   alias HedgeFundInterview.InterviewMessageSchema
   alias HedgeFundInterview.Prisms.AnswerInterviewQuestion
   alias HedgeFundInterview.Prisms.SendResponseSignal
+
   use Lux.Beam,
     name: "Interview Answer Workflow",
     description: "A workflow for answering interview questions",

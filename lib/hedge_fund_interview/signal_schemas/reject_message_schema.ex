@@ -6,6 +6,7 @@ defmodule HedgeFundInterview.Schemas.RejectMessageSchema do
   @id "c44fcb27-3d4c-4241-bcff-14880ffb7896"
 
   use Lux.SignalSchema,
+    id: @id,
     name: "reject_message",
     schema: %{
       type: "object",
@@ -22,6 +23,4 @@ defmodule HedgeFundInterview.Schemas.RejectMessageSchema do
     compatibility: "full",
     status: "active",
     format: "json"
-
-  def signal_schema_id, do: @id
 end
