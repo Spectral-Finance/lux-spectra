@@ -4,6 +4,7 @@ defmodule HedgeFundInterviewWeb.SignalController do
   alias HedgeFundInterview.Beams.BeginInterview
   alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
   alias HedgeFundInterview.Beams.MessagesExhaustedWorkflow
+  alias HedgeFundInterview.Beams.ResumeInterviewWorkflow
   alias HedgeFundInterview.Schemas.ErrorSchema
   alias HedgeFundInterview.Schemas.InterviewMessageSchema
   alias HedgeFundInterview.Schemas.MessagesCountResponseSchema
@@ -122,11 +123,22 @@ defmodule HedgeFundInterviewWeb.SignalController do
       :ok
     else
       false ->
-        #TODO: Continue interview workflow when memory is implemented
-        :ok
+        run_resume_interview()
 
       {:error, error} ->
         {:error, error}
+    end
+  end
+
+  defp run_resume_interview do
+    case Runner.run(ResumeInterviewWorkflow.beam(), %{}) do
+      {:ok, _beam_result, _beam_acc} ->
+        Logger.info("Resuming interview")
+        :ok
+
+      {:error, error} ->
+        Logger.error("Failed to resume interview: #{inspect(error)}")
+        {:error, "Failed to resume interview"}
     end
   end
 
