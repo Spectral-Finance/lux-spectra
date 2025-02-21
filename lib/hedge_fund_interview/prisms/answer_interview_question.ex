@@ -21,7 +21,18 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
     llm_config = %Config{
       api_key: System.get_env("OPENAI_API_KEY"),
       model: "gpt-4o",
-      temperature: 0.2
+      temperature: 0.2,
+      json_response: true,
+      json_schema: %{
+        name: "answer_interview_question",
+        schema: %{
+          type: "object",
+          properties: %{
+            response: %{type: "string"}
+          },
+          required: ["response"]
+        }
+      }
     }
 
     case LLM.call(prompt, [], llm_config) do

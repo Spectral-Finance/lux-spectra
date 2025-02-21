@@ -132,9 +132,12 @@ if config_env() == :prod do
     metadata: [:request_id]
 
   config :lux, Lux.Agent,
-    provider: :openai,  # or :anthropic if using Claude
-    api_key: System.get_env("OPENAI_API_KEY"), # or "ANTHROPIC_API_KEY" if using Claude
-    model: "gpt-4" # or "claude-3-sonnet-20240229" if using Claude
+    # or :anthropic if using Claude
+    provider: :openai,
+    # or "ANTHROPIC_API_KEY" if using Claude
+    api_key: System.get_env("OPENAI_API_KEY"),
+    # or "claude-3-sonnet-20240229" if using Claude
+    model: "gpt-4"
 end
 
 # Add development logging configuration

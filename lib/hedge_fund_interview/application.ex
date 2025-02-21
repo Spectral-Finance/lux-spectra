@@ -9,7 +9,8 @@ defmodule HedgeFundInterview.Application do
   def start(_type, _args) do
     children = [
       HedgeFundInterviewWeb.Telemetry,
-      {DNSCluster, query: Application.get_env(:hedge_fund_interview, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:hedge_fund_interview, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: HedgeFundInterview.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: HedgeFundInterview.Finch},

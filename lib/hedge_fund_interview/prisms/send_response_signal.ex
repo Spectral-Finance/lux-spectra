@@ -3,7 +3,6 @@ defmodule HedgeFundInterview.Prisms.SendResponseSignal do
 
   @interview_message_schema_id "c5f8b7e1-1b2a-5e2a-9f2a-1b2a5e2a9f2a"
 
-
   def handler(answer, _ctx) do
     response_signal = %{
       id: Lux.UUID.generate(),
