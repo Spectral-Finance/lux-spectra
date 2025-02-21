@@ -7,6 +7,9 @@ defmodule HedgeFundInterview.Application do
 
   @impl true
   def start(_type, _args) do
+    # Initialize the interview memory ETS table
+    HedgeFundInterview.InterviewMemory.start_link()
+
     children = [
       HedgeFundInterviewWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:hedge_fund_interview, :dns_cluster_query) || :ignore},
