@@ -32,7 +32,10 @@ defmodule HedgeFundInterview.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:lux, git: "git@github.com:Spectral-Finance/lux.git", ref: "main", runtime: false},
+      {:lux,
+       git: "https://github.com/Spectral-Finance/lux.git",
+       ref: "b4d01f3524d1776f8675bd0421053db7b921db6b",
+       runtime: false},
       {:phoenix, "~> 1.7.19"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},

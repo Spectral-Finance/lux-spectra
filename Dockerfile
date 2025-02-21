@@ -13,12 +13,7 @@ ENV MIX_ENV=${MIX_ENV} \
 RUN apt update \
   && apt upgrade -y \
   && apt install -y bash curl git build-essential inotify-tools
-
-# Setup SSH for private dependencies
-RUN mkdir -p ~/.ssh && \
-    chmod 700 ~/.ssh && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
-
+  
 # Create app directory
 WORKDIR /app
 
