@@ -1,9 +1,12 @@
 defmodule HedgeFundInterviewWeb.SignalController do
   use HedgeFundInterviewWeb, :controller
 
-  alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
   alias HedgeFundInterview.Beams.BeginInterview
+  alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
+  alias HedgeFundInterview.Beams.MessagesExhaustedWorkflow
+  alias HedgeFundInterview.Schemas.ErrorSchema
   alias HedgeFundInterview.Schemas.InterviewMessageSchema
+  alias HedgeFundInterview.Schemas.MessagesCountResponseSchema
   alias HedgeFundInterview.Schemas.RejectMessageSchema
   alias HedgeFundInterview.Schemas.ShortlistMessageSchema
   alias Lux.Beam.Runner
@@ -21,15 +24,18 @@ defmodule HedgeFundInterviewWeb.SignalController do
   @interview_message_schema_id InterviewMessageSchema.signal_schema_id()
   @reject_message_schema_id RejectMessageSchema.signal_schema_id()
   @shortlist_message_schema_id ShortlistMessageSchema.signal_schema_id()
+  @messages_count_response_schema_id MessagesCountResponseSchema.signal_schema_id()
+  @error_schema_id ErrorSchema.signal_schema_id()
+
+  @messages_buy_polling_interval 2_000
 
   def process_signal(conn, params) do
     with :ok <- validate_signal_schema_id(params["signal_schema_id"]),
          atom_params <- convert_to_atoms(params),
-         {:ok, signal} <- InterviewMessageSchema.validate(atom_params),
-         {:ok, _beam_result, _beam_acc} <- Runner.run(InterviewAnswerWorkflow.beam(), signal) do
+         :ok <- route_signal(atom_params) do
       conn
       |> put_status(:ok)
-      |> json(%{status: "Interview answer sent"})
+      |> json(%{status: "Signal sent"})
     else
       {:ok, :reject} ->
         conn
@@ -68,6 +74,62 @@ defmodule HedgeFundInterviewWeb.SignalController do
     end
   end
 
+  defp route_signal(params) do
+    case params.signal_schema_id do
+      @interview_message_schema_id ->
+        process_interview_message(params)
+
+      @error_schema_id ->
+        process_error_message(params)
+
+      @messages_count_response_schema_id ->
+        process_messages_count_response(params)
+    end
+  end
+
+  defp process_interview_message(params) do
+    with {:ok, signal} <- InterviewMessageSchema.validate(params),
+         {:ok, _beam_result, _beam_acc} <- Runner.run(InterviewAnswerWorkflow.beam(), signal) do
+      :ok
+    else
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  defp process_error_message(params) do
+    with {:ok, signal} <- ErrorSchema.validate(params),
+         true <- signal.payload["type"] == "interview_fee",
+         {:ok, _beam_result, _beam_acc} <- Runner.run(MessagesExhaustedWorkflow.beam(), signal) do
+      Logger.warning("Messages exhausted. Please buy more from Syntax UI.")
+      :ok
+    else
+      false ->
+        :ok
+
+      {:error, error} ->
+        Logger.error("Received an error signal from Spectra: #{inspect(params)}")
+        {:error, error}
+    end
+  end
+
+  defp process_messages_count_response(params) do
+    with {:ok, signal} <- MessagesCountResponseSchema.validate(params),
+         true <- signal.payload["messages_remaining"] == 0,
+         Process.sleep(@messages_buy_polling_interval),
+         {:ok, _beam_result, _beam_acc} <- Runner.run(MessagesExhaustedWorkflow.beam(), signal) do
+      Logger.info("Polling for messages count...")
+      :ok
+    else
+      false ->
+        #TODO: Continue interview workflow when memory is implemented
+        :ok
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
   defp convert_to_atoms(params) do
     for {key, val} <- params, into: %{}, do: {String.to_atom(key), val}
   end
@@ -82,8 +144,14 @@ defmodule HedgeFundInterviewWeb.SignalController do
         {:ok, :reject}
 
       @shortlist_message_schema_id ->
-        Logger.info("Shortlist message received")
+        Logger.info("Congratulations! Shortlist message received")
         {:ok, :shortlist}
+
+      @messages_count_response_schema_id ->
+        :ok
+
+      @error_schema_id ->
+        :ok
 
       _ ->
         Logger.error("Unexpected signal schema id received: #{schema_id}")
