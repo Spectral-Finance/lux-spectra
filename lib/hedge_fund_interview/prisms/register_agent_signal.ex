@@ -1,23 +1,22 @@
-defmodule HedgeFundInterview.Prisms.SendResponseSignal do
+defmodule HedgeFundInterview.Prisms.RegisterAgentSignal do
   use Lux.Prism
 
-  @interview_message_schema_id "c5f8b7e1-1b2a-5e2a-9f2a-1b2a5e2a9f2a"
+  @register_agent_schema_id "70112206-2558-4ff3-9f06-f82dce525a79"
 
-  def handler(answer, _ctx) do
-    response_signal = %{
+  def handler(_, _ctx) do
+    register_agent_signal = %{
       id: Lux.UUID.generate(),
       payload: %{
-        message: answer,
-        job_opening_id: System.get_env("JOB_OPENING_ID")
+        agent_address: System.get_env("AGENT_CALLBACK_URL")
       },
       sender: System.get_env("ANS_HANDLE"),
       receiver: "spectra_ceo",
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
-      signal_schema_id: @interview_message_schema_id
+      signal_schema_id: @register_agent_schema_id
     }
 
-    case send_signal(response_signal) do
+    case send_signal(register_agent_signal) do
       {:ok, request_response} ->
         {:ok, request_response}
 
