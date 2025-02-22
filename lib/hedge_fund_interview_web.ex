@@ -53,7 +53,7 @@ defmodule HedgeFundInterviewWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {HedgeFundInterviewWeb.Layouts, :app}
+        layout: {HedgeFundInterviewWeb.Layouts, :live}
 
       unquote(html_helpers())
     end
