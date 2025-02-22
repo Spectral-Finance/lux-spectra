@@ -17,14 +17,13 @@ defmodule HedgeFundInterviewWeb.Router do
   scope "/", HedgeFundInterviewWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive
   end
 
   scope "/api", HedgeFundInterviewWeb do
     pipe_through :api
 
     post "/signals", SignalController, :process_signal
-    post "/begin_interview", SignalController, :begin_interview
   end
 
   # Other scopes may use custom stacks.

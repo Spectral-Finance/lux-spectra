@@ -1,7 +1,6 @@
 defmodule HedgeFundInterviewWeb.SignalController do
   use HedgeFundInterviewWeb, :controller
 
-  alias HedgeFundInterview.Beams.BeginInterview
   alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
   alias HedgeFundInterview.Beams.MessagesExhaustedWorkflow
   alias HedgeFundInterview.Beams.ResumeInterviewWorkflow
@@ -13,14 +12,6 @@ defmodule HedgeFundInterviewWeb.SignalController do
   alias Lux.Beam.Runner
 
   require Logger
-
-  @start_interview """
-    Hi, I'm Botoshi NakAImoto. I appreciate the opportunity to discuss how my background can contribute to your hedge fund. My expertise lies at the intersection of blockchain protocols, quantitative finance, and software engineering. Over the past few years, I’ve focused on building algorithmic trading systems that leverage machine learning and advanced statistical models to capture inefficiencies in both centralized and decentralized crypto markets.
-
-    In my recent work, I’ve explored L2 scaling solutions and sidechains to address throughput constraints for high-frequency trading, while simultaneously researching on-chain liquidity protocols—like Uniswap v3 and Curve—to design automated market-making strategies that mitigate impermanent loss. I’m also comfortable applying time-series analysis, factor models, and option pricing frameworks to crypto assets, ensuring robust risk management in volatile environments.
-
-    I'm excited to dive into the details of my projects and discuss how my skill set aligns with your firm's trading and DeFi initiatives.
-  """
 
   @interview_message_schema_id InterviewMessageSchema.signal_schema_id()
   @reject_message_schema_id RejectMessageSchema.signal_schema_id()
@@ -61,20 +52,6 @@ defmodule HedgeFundInterviewWeb.SignalController do
     end
   end
 
-  def begin_interview(conn, _params) do
-    case Runner.run(BeginInterview.beam(), @start_interview) do
-      {:ok, _beam_result, _beam_acc} ->
-        conn
-        |> put_status(:ok)
-        |> json(%{status: "success"})
-
-      {:error, _error} ->
-        conn
-        |> put_status(:internal_server_error)
-        |> json(%{error: "An unexpected error occurred"})
-    end
-  end
-
   defp route_signal(params) do
     case params.signal_schema_id do
       @interview_message_schema_id ->
@@ -102,6 +79,7 @@ defmodule HedgeFundInterviewWeb.SignalController do
     with {:ok, signal} <- ErrorSchema.validate(params),
          true <- signal.payload["type"] == "interview_fee",
          {:ok, _beam_result, _beam_acc} <- Runner.run(MessagesExhaustedWorkflow.beam(), signal) do
+      Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_paused})
       Logger.warning("Messages exhausted. Please buy more from Syntax UI.")
       :ok
     else
@@ -109,6 +87,7 @@ defmodule HedgeFundInterviewWeb.SignalController do
         :ok
 
       {:error, error} ->
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_error})
         Logger.error("Received an error signal from Spectra: #{inspect(params)}")
         {:error, error}
     end
@@ -134,10 +113,12 @@ defmodule HedgeFundInterviewWeb.SignalController do
     case Runner.run(ResumeInterviewWorkflow.beam(), %{}) do
       {:ok, _beam_result, _beam_acc} ->
         Logger.info("Resuming interview")
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_started})
         :ok
 
       {:error, error} ->
         Logger.error("Failed to resume interview: #{inspect(error)}")
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_error})
         {:error, "Failed to resume interview"}
     end
   end
@@ -153,10 +134,12 @@ defmodule HedgeFundInterviewWeb.SignalController do
 
       @reject_message_schema_id ->
         Logger.info("Reject message received")
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_rejected})
         {:ok, :reject}
 
       @shortlist_message_schema_id ->
         Logger.info("Congratulations! Shortlist message received")
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_shortlisted})
         {:ok, :shortlist}
 
       @messages_count_response_schema_id ->
