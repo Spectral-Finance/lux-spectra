@@ -1,22 +1,23 @@
 defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
+  use Lux.Prism
+
+  alias HedgeFundInterview.Prisms.FetchSignalsHistory
   alias Lux.LLM
   alias Lux.LLM.OpenAI.Config
-
-  use Lux.Prism
 
   @system_prompt File.read!("prompt.txt")
 
   def handler(input, _ctx) do
     question = input.payload["message"]
+    job_opening_id = input.payload["job_opening_id"]
 
-    case call_llm(question) do
-      {:ok, response} -> {:ok, response}
-      {:error, error} -> {:error, error}
+    with {:ok, history} <- FetchSignalsHistory.run(%{job_opening_id: job_opening_id}) do
+      call_llm(question, history)
     end
   end
 
-  defp call_llm(input) do
-    prompt = build_prompt(input)
+  defp call_llm(input, history) do
+    prompt = build_prompt(input, history)
 
     llm_config = %Config{
       api_key: System.get_env("OPENAI_API_KEY"),
@@ -33,9 +34,14 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
       {:error, error}
   end
 
-  defp build_prompt(input) do
+  defp build_prompt(input, history) do
+    history_string = Enum.join(history, "\n")
+
     """
     #{inspect(@system_prompt)}
+
+    History:
+    #{history_string}
 
     Question: #{input}
 
