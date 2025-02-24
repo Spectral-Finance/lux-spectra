@@ -1,5 +1,5 @@
 defmodule HedgeFundInterview.Beams.BeginInterview do
-  alias HedgeFundInterview.Prisms.SendResponseSignal
+  alias HedgeFundInterview.Prisms.RequestInterviewHistory
   alias HedgeFundInterview.Prisms.RegisterAgentSignal
 
   use Lux.Beam,
@@ -11,7 +11,7 @@ defmodule HedgeFundInterview.Beams.BeginInterview do
   def steps do
     sequence do
       step(:register_agent, RegisterAgentSignal, [:input])
-      step(:send_response, SendResponseSignal, [:input])
+      step(:request_interview_history, RequestInterviewHistory, [:input])
     end
   end
 end

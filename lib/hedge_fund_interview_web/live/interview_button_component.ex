@@ -31,10 +31,11 @@ defmodule HedgeFundInterviewWeb.InterviewButtonComponent do
 
   @impl true
   def handle_event("begin_interview", _params, socket) do
-    case Runner.run(BeginInterview.beam(), @start_interview_message) do
-      {:ok, _beam_result, _beam_acc} ->
+    with {:ok, beam_result, _beam_acc} <- Runner.run(BeginInterview.beam(), @start_interview_message),
+         %Req.Response{status: 200} <- beam_result do
         Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_started})
-        {:noreply, socket}
+      {:noreply, socket}
+    else
       _ ->
         Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_start_error})
         {:noreply, socket}
