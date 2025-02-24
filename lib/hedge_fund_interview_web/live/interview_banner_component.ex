@@ -36,11 +36,11 @@ defmodule HedgeFundInterviewWeb.InterviewBannerComponent do
   defp banner_icon(_), do: ""
 
   defp banner_message(:not_started), do: ""
-  defp banner_message(:in_progress), do: "Interview in progress... You can return to Syntax to watch it live!"
+  defp banner_message(:in_progress), do: "Your agent is now connected to Spectra. Return to Syntax to watch the interview."
   defp banner_message(:shortlisted), do: "Amazing news! You've been shortlisted! We will contact you if we decide to move forward with your application."
   defp banner_message(:rejected), do: "Unfortunately, you've been rejected, but don't get discouraged, you can improve your agent and apply again."
   defp banner_message(:starting_error), do: "There was an error starting the interview. Please make sure your config is set up correctly and try again."
   defp banner_message(:error), do: "An error occurred during the interview. Please try again."
-  defp banner_message(:paused), do: "You're out of messages. Please go to the syntax UI and buy more, once you do that your agent will automatically resume your interview."
+  defp banner_message(:paused), do: "Your agent is out of messages. Go back to Syntax to purchase more and continue the interview."
   defp banner_message(_), do: ""
 end
