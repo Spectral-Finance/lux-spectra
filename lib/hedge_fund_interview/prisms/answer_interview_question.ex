@@ -35,13 +35,9 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
 
   defp build_prompt(input, past_messages) do
     conversation_history =
-      Enum.reduce(
-        past_messages,
-        "",
-        fn %{sender: sender, message: message}, acc ->
-          "#{acc}#{sender}: #{message}\n"
-        end
-      )
+      Enum.map_join(past_messages, "\n", fn %{sender: sender, message: message} ->
+        "#{sender}: #{message}"
+      end)
 
     """
     #{inspect(@system_prompt)}
