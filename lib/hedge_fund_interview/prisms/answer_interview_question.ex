@@ -11,11 +11,12 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
   end
 
   def handler(question, _ctx) when is_binary(question) do
-    call_llm(question)
+    past_messages = HedgeFundInterview.InterviewMemory.get_all_messages()
+    call_llm(question, past_messages)
   end
 
-  defp call_llm(input) do
-    prompt = build_prompt(input)
+  defp call_llm(input, past_messages) do
+    prompt = build_prompt(input, past_messages) |> IO.inspect(label: "PROMPT")
 
     llm_config = %Config{
       api_key: System.get_env("OPENAI_API_KEY"),
@@ -32,9 +33,21 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
       {:error, error}
   end
 
-  defp build_prompt(input) do
+  defp build_prompt(input, past_messages) do
+    conversation_history =
+      Enum.reduce(
+        past_messages,
+        "",
+        fn %{sender: sender, message: message}, acc ->
+          "#{acc}#{sender}: #{message}\n"
+        end
+      )
+
     """
     #{inspect(@system_prompt)}
+
+    Previous conversation:
+    #{conversation_history}
 
     Question: #{input}
 
