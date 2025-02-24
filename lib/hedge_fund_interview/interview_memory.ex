@@ -19,8 +19,7 @@ defmodule HedgeFundInterview.InterviewMemory do
     timestamp = :os.system_time(:millisecond)
     entries =
       messages
-      |> Enum.with_index()
-      |> Enum.map(fn {msg, index} ->
+      |> Enum.with_index(fn msg, index ->
         # Add microsecond offsets to ensure unique timestamps
         # Using this offset so system time does not clash with the UTC timestamp
         # when inserting new messages afterwards
