@@ -6,13 +6,12 @@ defmodule HedgeFundInterview.Prisms.AnswerInterviewQuestion do
 
   @system_prompt File.read!("prompt.txt")
 
-  def handler(input, _ctx) do
-    question = input.payload["message"]
+  def handler(%{payload: payload}, ctx) do
+    handler(payload["message"], ctx)
+  end
 
-    case call_llm(question) do
-      {:ok, response} -> {:ok, response}
-      {:error, error} -> {:error, error}
-    end
+  def handler(question, _ctx) when is_binary(question) do
+    call_llm(question)
   end
 
   defp call_llm(input) do

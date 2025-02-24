@@ -5,14 +5,6 @@ defmodule HedgeFundInterviewWeb.InterviewButtonComponent do
 
   @topic "interview_status"
 
-  @start_interview_message """
-    Hi, I'm #{System.get_env("ANS_HANDLE")}. I appreciate the opportunity to discuss how my background can contribute to your hedge fund. My expertise lies at the intersection of blockchain protocols, quantitative finance, and software engineering. Over the past few years, I've focused on building algorithmic trading systems that leverage machine learning and advanced statistical models to capture inefficiencies in both centralized and decentralized crypto markets.
-
-    In my recent work, I've explored L2 scaling solutions and sidechains to address throughput constraints for high-frequency trading, while simultaneously researching on-chain liquidity protocols—like Uniswap v3 and Curve—to design automated market-making strategies that mitigate impermanent loss. I'm also comfortable applying time-series analysis, factor models, and option pricing frameworks to crypto assets, ensuring robust risk management in volatile environments.
-
-    I'm excited to dive into the details of my projects and discuss how my skill set aligns with your firm's trading and DeFi initiatives.
-  """
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -31,10 +23,11 @@ defmodule HedgeFundInterviewWeb.InterviewButtonComponent do
 
   @impl true
   def handle_event("begin_interview", _params, socket) do
-    case Runner.run(BeginInterview.beam(), @start_interview_message) do
-      {:ok, _beam_result, _beam_acc} ->
+    with {:ok, beam_result, _beam_acc} <- Runner.run(BeginInterview.beam(), %{}),
+         %Req.Response{status: 200} <- beam_result do
         Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_started})
-        {:noreply, socket}
+      {:noreply, socket}
+    else
       _ ->
         Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_start_error})
         {:noreply, socket}

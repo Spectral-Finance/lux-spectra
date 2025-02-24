@@ -2,9 +2,11 @@ defmodule HedgeFundInterviewWeb.SignalController do
   use HedgeFundInterviewWeb, :controller
 
   alias HedgeFundInterview.Beams.InterviewAnswerWorkflow
+  alias HedgeFundInterview.Beams.InterviewHistoryWorkflow
   alias HedgeFundInterview.Beams.MessagesExhaustedWorkflow
   alias HedgeFundInterview.Beams.ResumeInterviewWorkflow
   alias HedgeFundInterview.Schemas.ErrorSchema
+  alias HedgeFundInterview.Schemas.InterviewHistoryResponseSchema
   alias HedgeFundInterview.Schemas.InterviewMessageSchema
   alias HedgeFundInterview.Schemas.MessagesCountResponseSchema
   alias HedgeFundInterview.Schemas.RejectMessageSchema
@@ -18,6 +20,7 @@ defmodule HedgeFundInterviewWeb.SignalController do
   @shortlist_message_schema_id ShortlistMessageSchema.signal_schema_id()
   @messages_count_response_schema_id MessagesCountResponseSchema.signal_schema_id()
   @error_schema_id ErrorSchema.signal_schema_id()
+  @interview_history_response_schema_id InterviewHistoryResponseSchema.signal_schema_id()
 
   @messages_buy_polling_interval 2_000
 
@@ -62,6 +65,9 @@ defmodule HedgeFundInterviewWeb.SignalController do
 
       @messages_count_response_schema_id ->
         process_messages_count_response(params)
+
+      @interview_history_response_schema_id ->
+        process_interview_history_response(params)
     end
   end
 
@@ -109,6 +115,16 @@ defmodule HedgeFundInterviewWeb.SignalController do
     end
   end
 
+  defp process_interview_history_response(params) do
+    with {:ok, signal} <- InterviewHistoryResponseSchema.validate(params),
+         {:ok, _beam_result, _beam_acc} <- Runner.run(InterviewHistoryWorkflow.beam(), signal) do
+      :ok
+    else
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
   defp run_resume_interview do
     case Runner.run(ResumeInterviewWorkflow.beam(), %{}) do
       {:ok, _beam_result, _beam_acc} ->
@@ -146,6 +162,9 @@ defmodule HedgeFundInterviewWeb.SignalController do
         :ok
 
       @error_schema_id ->
+        :ok
+
+      @interview_history_response_schema_id ->
         :ok
 
       _ ->
