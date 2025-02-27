@@ -25,11 +25,11 @@ defmodule HedgeFundInterviewWeb.InterviewButtonComponent do
   def handle_event("begin_interview", _params, socket) do
     with {:ok, beam_result, _beam_acc} <- Runner.run(BeginInterview.beam(), %{}),
          %Req.Response{status: 200} <- beam_result do
-        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_started})
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, @topic, {:interview_started})
       {:noreply, socket}
     else
       _ ->
-        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, "interview_status", {:interview_start_error})
+        Phoenix.PubSub.broadcast(HedgeFundInterview.PubSub, @topic, {:interview_start_error})
         {:noreply, socket}
     end
   end
@@ -43,13 +43,4 @@ defmodule HedgeFundInterviewWeb.InterviewButtonComponent do
   defp button_text(:error), do: "Error during the interview"
 
   defp button_text(_), do: "Begin Interview" # fallback for any undefined status
-
-  defp url_for(path) do
-    endpoint_config = Application.get_env(:hedge_fund_interview, HedgeFundInterviewWeb.Endpoint)
-    url = endpoint_config[:url]
-    host = url[:host]
-    port = url[:port]
-    scheme = if Mix.env() == :prod, do: "https", else: "http"
-    "#{scheme}://#{host}:#{port}#{path}"
-  end
 end
