@@ -14,7 +14,7 @@ defmodule HedgeFundInterview.Prisms.RegisterAgentSignal do
         agent_address: agent_address
       },
       sender: System.get_env("ANS_HANDLE"),
-      receiver: "spectra_ceo",
+      receiver: "spectra_ceo.ethAgent",
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
       signal_schema_id: @register_agent_schema_id
