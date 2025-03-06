@@ -10,7 +10,7 @@ defmodule HedgeFundInterview.Prisms.SendMessageCountRequestSignal do
       id: Lux.UUID.generate(),
       payload: %{},
       sender: System.get_env("ANS_HANDLE"),
-      receiver: "spectra_ceo",
+      receiver: "spectra_ceo.ethAgent",
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
       signal_schema_id: @message_count_request_schema_id
