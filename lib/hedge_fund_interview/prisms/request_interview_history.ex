@@ -11,6 +11,7 @@ defmodule HedgeFundInterview.Prisms.RequestInterviewHistory do
         job_opening_id: System.get_env("JOB_OPENING_ID")
       },
       sender: System.get_env("ANS_HANDLE"),
+      topic: nil,
       receiver: "spectra_ceo.ethAgent",
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},

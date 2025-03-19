@@ -11,6 +11,7 @@ defmodule HedgeFundInterview.Prisms.SendMessageCountRequestSignal do
       payload: %{},
       sender: System.get_env("ANS_HANDLE"),
       receiver: "spectra_ceo.ethAgent",
+      topic: nil,
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
       signal_schema_id: @message_count_request_schema_id
