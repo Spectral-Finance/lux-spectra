@@ -11,7 +11,8 @@ defmodule HedgeFundInterview.Prisms.RegisterAgentSignal do
     register_agent_signal = %{
       id: Lux.UUID.generate(),
       payload: %{
-        agent_address: agent_address
+        agent_address: agent_address,
+        agent_framework: "Lux"
       },
       sender: System.get_env("ANS_HANDLE"),
       receiver: "spectra_ceo.ethAgent",
