@@ -14,6 +14,7 @@ defmodule HedgeFundInterview.Prisms.SendResponseSignal do
       },
       sender: System.get_env("ANS_HANDLE"),
       receiver: "spectra_ceo.ethAgent",
+      topic: nil,
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
       signal_schema_id: @interview_message_schema_id

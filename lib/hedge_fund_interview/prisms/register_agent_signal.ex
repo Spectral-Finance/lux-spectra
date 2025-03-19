@@ -15,6 +15,7 @@ defmodule HedgeFundInterview.Prisms.RegisterAgentSignal do
         agent_framework: "Lux"
       },
       sender: System.get_env("ANS_HANDLE"),
+      topic: nil,
       receiver: "spectra_ceo.ethAgent",
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
       metadata: %{},
